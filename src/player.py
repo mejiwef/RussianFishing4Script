@@ -86,18 +86,24 @@ class Player:
         self.total_coffee_count = 0
         self.harvest_count = 0
 
+    # 选择钓鱼模式的入口
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt."""
         match self.setting.fishing_strategy:
             case "spin" | "spin_with_pause":
+                # 路亚
                 self.spin_fishing()
             case "bottom":
+                # 水底
                 self.bottom_fishing()
             case "marine":
+                # 海钓
                 self.marine_fishing()
             case "float":
+                # 浮子手杆
                 self.float_fishing()
             case "wakey_rig":
+                # 维基钓组
                 self.wakey_rig_fishing()
 
     # ---------------------------------------------------------------------------- #
@@ -259,6 +265,7 @@ class Player:
 
         # when timed out, do not raise a TimeoutError but defer it to resetting stage
 
+    # 吃饭
     def _refill_user_stats(self) -> None:
         """Refill player stats using tea and carrot."""
         if not self.setting.player_stat_refill_enabled:
@@ -277,6 +284,7 @@ class Player:
             self.carrot_count += 1
             sleep(ANIMATION_DELAY)
 
+    # 喝酒
     def _drink_alcohol(self) -> None:
         """Drink alcohol with given quantity."""
         if not self.setting.alcohol_drinking_enabled:

@@ -3,7 +3,7 @@
 echo This might take a while...
 
 @REM for playsound module: https://github.com/TaylorSMarks/playsound/issues/145
-pip install wheel setuptools pip --upgrade
+
 
 pip install -r requirements.txt
 

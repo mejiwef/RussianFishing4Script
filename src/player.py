@@ -111,8 +111,10 @@ class Player:
     # ---------------------------------------------------------------------------- #
     def spin_fishing(self) -> None:
         """Main spin fishing loop for "spin" and "spin_with_pause"."""
+        # 路亚是否打状态
         spin_with_pause = self.setting.fishing_strategy == "spin_with_pause"
         while True:
+            # 吃饭
             self._refill_user_stats()
             self._resetting_stage()
             self.tackle.cast()

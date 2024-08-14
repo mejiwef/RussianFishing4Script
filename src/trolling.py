@@ -135,8 +135,11 @@ class Trolling():
     # 恢复体力
     def stamina(self, sleep) -> None:
         while True:
-            logger.info("恢复体力")
             time.sleep(sleep)
+            logger.info("恢复体力")
+            pyautogui.keyDown('5')
+            time.sleep(0.3)
+            pyautogui.keyUp('5')
 
     # 恢复饱食度
     def eat(self, sleep) -> None:

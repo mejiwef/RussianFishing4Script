@@ -169,6 +169,7 @@ class Player:
         trolling = Trolling()
         # 27图26米坑 60,325 - 85,270
         _thread.start_new_thread(trolling.cruise, (60, 325, 85, 270))
+        _thread.start_new_thread(trolling.stamina, (120,))
 
         while True:
             self._refill_user_stats()

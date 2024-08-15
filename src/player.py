@@ -6,6 +6,7 @@ import os
 import smtplib
 import sys
 import _thread
+import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -168,8 +169,9 @@ class Player:
         # 拖钓点位按需修改
         trolling = Trolling()
         # 27图26米坑 60,325 - 85,270
-        _thread.start_new_thread(trolling.cruise, (60, 325, 85, 270))
-        _thread.start_new_thread(trolling.stamina, (120,))
+        # 27图12米坑 400,208 - 457,227
+        _thread.start_new_thread(trolling.cruise, (400, 208, 457, 227))
+        _thread.start_new_thread(trolling.stamina, (180,))
 
         while True:
             self._refill_user_stats()

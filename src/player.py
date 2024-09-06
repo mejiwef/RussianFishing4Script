@@ -408,9 +408,6 @@ class Player:
             self.save_screenshot()
             self.general_quit("Tackle is broken")
 
-        if self.monitor.is_disconnected():
-            self.disconnected_quit()
-
         if self.monitor.is_ticket_expired():
             self._handle_expired_ticket()
 
@@ -597,16 +594,7 @@ class Player:
         :type msg: str
         """
         sleep(ANIMATION_DELAY)  # pre-delay
-        pag.press("esc")
-        pag.click()  # prevent possible stuck
-        sleep(ANIMATION_DELAY)
-        pag.moveTo(self.monitor.get_quit_position())
-        pag.click()
-        sleep(ANIMATION_DELAY)
-        pag.moveTo(self.monitor.get_yes_position())
-        pag.click()
-
-        self._handle_termination(msg, shutdown=True)
+        print("触发脚本退出 %s" % msg)
 
     def disconnected_quit(self) -> None:
         """Quit the game through main menu."""

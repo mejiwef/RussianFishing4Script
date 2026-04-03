@@ -368,6 +368,10 @@ _C.PROFILE.TROLLING.DESCRIPTION = "拖钓模式：自动巡航 + 多竿轮询。
 _C.PROFILE.TROLLING.LAUNCH_OPTIONS = ""
 # Fishing mode
 _C.PROFILE.TROLLING.MODE = "trolling"
+# Power level for casting (0.0-5.0)
+_C.PROFILE.TROLLING.CAST_POWER_LEVEL = 3.0
+# Time to wait for the line to deploy after casting, before locking the reel
+_C.PROFILE.TROLLING.CAST_DELAY = 4.0
 # 轮询鱼竿的快捷键列表（和底钓共用 BOTTOM_RODS 配置）
 # Time to wait before checking fish bite on the next rod
 _C.PROFILE.TROLLING.CHECK_DELAY = 16.0

@@ -279,7 +279,8 @@ class Player:
         流程：
         1. 按 J 启动拖钓（船自动前进）
         2. 启动巡航控制器（后台线程 OCR 读坐标、纠正航向）
-        3. 主循环轮询各鱼竿：拿起 → 检测有无鱼 → 收线/放回 → 切下一竿
+        3. 主循环轮询各鱼竿：
+           拿起 → 检测有无鱼 → 收线/起鱼 → 重新抛竿 → 等线放出 → 锁轮 → 切下一竿
         """
         # 启动拖钓（按 J 键）
         logger.info("启动拖钓")
@@ -301,7 +302,7 @@ class Player:
         else:
             logger.info("巡航未启用，船将直线行驶")
 
-        # 多竿轮询主循环（类似底钓，但不重新抛竿）
+        # 多竿轮询主循环
         while True:
             self.refill_stats()
             logger.info("检查鱼竿 %s", self.tackle_idx + 1)
@@ -310,20 +311,25 @@ class Player:
 
             with self.loop_restart_handler():
                 if self.detection.is_fish_hooked():
-                    # 有鱼上钩：收线 → 起鱼
-                    self.retrieve_line()
-                    self.lift_fish()
+                    self._trolling_retrieve_and_recast()
                 else:
                     sleep(self.cfg.PROFILE.PUT_DOWN_DELAY)
                     if self.detection.is_fish_hooked():
-                        self.retrieve_line()
-                        self.lift_fish()
+                        self._trolling_retrieve_and_recast()
                     else:
                         # 没有鱼，放下鱼竿等待
                         press("0")
                         sleep(add_jitter(self.cfg.PROFILE.CHECK_DELAY))
 
             self._update_tackle()
+
+    def _trolling_retrieve_and_recast(self) -> None:
+        """拖钓模式：收线 → 起鱼 → 重新抛竿 → 等线放出 → 锁轮。"""
+        self.retrieve_line()
+        self.lift_fish()
+        # 重新抛竿：抛出去 → 等待线放出 CAST_DELAY 秒 → 点击锁轮
+        self.reset_tackle()
+        self.cast_tackle(lock=True)
 
     def retrieve_and_recast(self) -> None:
         self.retrieve_line()

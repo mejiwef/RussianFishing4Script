@@ -152,6 +152,8 @@ PROFILE:
     DESCRIPTION: "拖钓模式：自动巡航 + 多竿轮询。"
     LAUNCH_OPTIONS: ""
     MODE: "trolling"
+    CAST_POWER_LEVEL: 3.0
+    CAST_DELAY: 4.0
     CHECK_DELAY: 16.0
     PUT_DOWN_DELAY: 2.0
     POST_ACCELERATION: false

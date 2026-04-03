@@ -199,7 +199,7 @@ class Player:
     def marine_fishing(self) -> None:
         # 喝咖啡
         trolling = Trolling()
-        _thread.start_new_thread(trolling.stamina, (120,))
+        _thread.start_new_thread(trolling.stamina, (180,))
         """Main marine fishing loop."""
         while True:
             self._refill_user_stats()

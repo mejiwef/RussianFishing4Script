@@ -98,6 +98,7 @@ class Player:
         self.shift_pressed = False
         self.using_spod_rod = False
         self.skip_cast = self.cfg.ARGS.SKIP_CAST
+        self.cruise = None  # 巡航控制器，在 enable_trolling() 中延迟初始化
 
     def start_fishing(self) -> None:
         """Start the main fishing loop with the specified fishing strategy."""
@@ -654,6 +655,17 @@ class Player:
         if not self.trolling_started:
             logger.info("Start trolling")
             press(TROLLING_KEY)
+            # 启动自动巡航（如果配置了）
+            if self.cfg.BOT.CRUISE.ENABLED and self.cruise is None:
+                from rf4s.controller.cruise import CruiseController
+                self.cruise = CruiseController(
+                    self.cfg, self.detection._sct
+                )
+                waypoints = list(self.cfg.BOT.CRUISE.WAYPOINTS)
+                if waypoints:
+                    self.cruise.start(waypoints)
+                else:
+                    logger.warning("巡航已启用但未配置航点 (BOT.CRUISE.WAYPOINTS)")
         if self.cfg.ARGS.TROLLING not in ("left", "right"):  # Forward
             return
         key = LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY
@@ -827,6 +839,8 @@ class Player:
         print(result_table)
         if self.cfg.ARGS.FRICTION_BRAKE:
             self.friction_brake.monitor_process.terminate()
+        if self.cruise is not None:
+            self.cruise.stop()
         with self.hold_keys(mouse=False, shift=False):
             utils.safe_exit()
 

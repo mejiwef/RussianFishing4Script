@@ -64,6 +64,16 @@ BOT:
     INCREASE_DELAY: 1.0
     DECREASE_DELAY: 1.0
     SENSITIVITY: "high"
+  CRUISE:
+    ENABLED: false
+    # 航点列表，[[x1, y1], [x2, y2]]，需根据实际钓点修改
+    WAYPOINTS: []
+    # 坐标识别区域相对窗口偏移 [x_offset, y_offset, width, height]
+    COORD_REGION: [2380, 1330, 100, 30]
+    CHECK_INTERVAL: 15.0
+    ARRIVAL_RADIUS: 10
+    TURN_RATE: 0.152
+    DIGIT_TEMPLATE_DIR: "digits"
 CRAFT:
   LAUNCH_OPTIONS: ""
 MOVE:

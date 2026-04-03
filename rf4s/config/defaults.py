@@ -178,6 +178,28 @@ _C.BOT.FRICTION_BRAKE.DECREASE_DELAY = 1.0
 # (options: low, medium, high, very_high)
 _C.BOT.FRICTION_BRAKE.SENSITIVITY = "high"
 
+
+# ---------------------------------------------------------------------------- #
+#                              Cruise Settings                                 #
+# ---------------------------------------------------------------------------- #
+_C.BOT.CRUISE = CN()
+# 是否启用自动巡航
+_C.BOT.CRUISE.ENABLED = False
+# 航点列表，格式: [[x1, y1], [x2, y2], ...]
+_C.BOT.CRUISE.WAYPOINTS = ()
+# 坐标识别区域相对窗口的偏移 [x_offset, y_offset, width, height]
+# 2560x1440 下默认值，其他分辨率需要调整
+_C.BOT.CRUISE.COORD_REGION = (2380, 1330, 100, 30)
+# 巡航检查间隔（秒）
+_C.BOT.CRUISE.CHECK_INTERVAL = 15.0
+# 航点到达半径（游戏坐标单位）
+_C.BOT.CRUISE.ARRIVAL_RADIUS = 10
+# 每度角转向需要按键的时长（秒），旧值 0.152 对应约 55 秒转 360 度
+_C.BOT.CRUISE.TURN_RATE = 0.152
+# 数字模板目录路径（相对于 static/），存放 0.png~9.png + colon.png
+_C.BOT.CRUISE.DIGIT_TEMPLATE_DIR = "digits"
+
+
 # ---------------------------------------------------------------------------- #
 #                                Craft Settings                                #
 # ---------------------------------------------------------------------------- #

@@ -62,15 +62,15 @@ class Tackle:
         self.gear_ratio_changed = False
         self.stage = None
 
-    def check_rare_events(self) -> None:
+    def check_rare_events(self, frame=None) -> None:
         """Check if the game disconnected or the boat ticket expired."""
-        if self.detection.is_tackle_broken():
+        if self.detection.is_tackle_broken(frame=frame):
             raise exceptions.TackleBrokenError
-        if self.detection.is_disconnected():
+        if self.detection.is_disconnected(frame=frame):
             raise exceptions.DisconnectedError
-        if self.detection.is_ticket_expired():
+        if self.detection.is_ticket_expired(frame=frame):
             raise exceptions.TicketExpiredError
-        if self.detection.is_stuck_at_casting():
+        if self.detection.is_stuck_at_casting(frame=frame):
             raise exceptions.StuckAtCastingError
 
     def reset(self) -> None:
@@ -81,26 +81,27 @@ class Tackle:
             self.stage = StageId.RESET
             self.timer.set_timeout_start_time()
         while True:
-            if self.detection.is_tackle_ready():
+            frame = self.detection.capture_frame()  # 一次截图，多次匹配
+            if self.detection.is_tackle_ready(frame=frame):
                 return
-            if self.detection.is_fish_hooked():
+            if self.detection.is_fish_hooked(frame=frame):
                 raise exceptions.FishHookedError
-            if self.detection.is_fish_captured():
+            if self.detection.is_fish_captured(frame=frame):
                 raise exceptions.FishCapturedError
-            if not self.detection.is_bait_chosen():
+            if not self.detection.is_bait_chosen(frame=frame):
                 raise exceptions.BaitNotChosenError
-            if self.cfg.BOT.SPOOLING_DETECTION and self.detection.is_line_at_end():
+            if self.cfg.BOT.SPOOLING_DETECTION and self.detection.is_line_at_end(frame=frame):
                 raise exceptions.LineAtEndError
-            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged(frame=frame):
                 raise exceptions.LineSnaggedError
-            if self.detection.is_lure_broken():
+            if self.detection.is_lure_broken(frame=frame):
                 raise exceptions.LureBrokenError
-            if self.detection.is_tackle_broken():
+            if self.detection.is_tackle_broken(frame=frame):
                 raise exceptions.TackleBrokenError
-            if not self.detection.is_dry_mix_chosen():
+            if not self.detection.is_dry_mix_chosen(frame=frame):
                 raise exceptions.DryMixNotChosenError
             if self.timer.is_rare_event_checkable():
-                self.check_rare_events()
+                self.check_rare_events(frame=frame)
             sleep(add_jitter(LOOP_DELAY))
 
     def cast(self, lock: bool) -> None:
@@ -133,7 +134,8 @@ class Tackle:
         logger.info("Sinking lure")
         self.timer.set_timeout_start_time()
         while not self.timer.is_sink_stage_timeout():
-            if self.detection.is_moving_in_bottom_layer():
+            frame = self.detection.capture_frame()
+            if self.detection.is_moving_in_bottom_layer(frame=frame):
                 logger.info("Lure has reached bottom layer")
                 sleep(
                     add_jitter(SINK_DELAY)
@@ -141,7 +143,7 @@ class Tackle:
                 self.timer.print_sink_duration()
                 break
 
-            if self.detection.is_fish_hooked_twice():
+            if self.detection.is_fish_hooked_twice(frame=frame):
                 pag.click()
                 return
             sleep(add_jitter(LOOP_DELAY))
@@ -159,19 +161,20 @@ class Tackle:
             self.stage = StageId.RETRIEVE
             self.timer.set_timeout_start_time()
         while True:
-            if self.detection.is_fish_hooked():
+            frame = self.detection.capture_frame()  # 一次截图，多次匹配
+            if self.detection.is_fish_hooked(frame=frame):
                 return
-            if self.detection.is_retrieval_finished():
+            if self.detection.is_retrieval_finished(frame=frame):
                 return
 
-            if self.detection.is_fish_captured():
+            if self.detection.is_fish_captured(frame=frame):
                 raise exceptions.FishCapturedError
-            if self.cfg.BOT.SPOOLING_DETECTION and self.detection.is_line_at_end():
+            if self.cfg.BOT.SPOOLING_DETECTION and self.detection.is_line_at_end(frame=frame):
                 raise exceptions.LineAtEndError
-            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged(frame=frame):
                 raise exceptions.LineSnaggedError
             if self.timer.is_rare_event_checkable():
-                self.check_rare_events()
+                self.check_rare_events(frame=frame)
             sleep(add_jitter(LOOP_DELAY))
 
     def pull(self) -> None:
@@ -187,20 +190,21 @@ class Tackle:
             self.stage = StageId.PULL
             self.timer.set_timeout_start_time()
         while True:
-            if self.detection.is_retrieval_finished():
+            frame = self.detection.capture_frame()  # 一次截图，多次匹配
+            if self.detection.is_retrieval_finished(frame=frame):
                 return
 
             if self.cfg.ARGS.LIFT:
                 self.hold_mouse_button(LIFT_DURATION, button="right")
 
-            if self.detection.is_fish_captured():
+            if self.detection.is_fish_captured(frame=frame):
                 raise exceptions.FishCapturedError
-            if self.cfg.BOT.SPOOLING_DETECTION and self.detection.is_line_at_end():
+            if self.cfg.BOT.SPOOLING_DETECTION and self.detection.is_line_at_end(frame=frame):
                 raise exceptions.LineAtEndError
-            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged(frame=frame):
                 raise exceptions.LineSnaggedError
             if self.timer.is_rare_event_checkable():
-                self.check_rare_events()
+                self.check_rare_events(frame=frame)
             sleep(add_jitter(LOOP_DELAY))
             if self.timer.is_coffee_drinkable():
                 raise exceptions.CoffeeTimeoutError
@@ -219,9 +223,10 @@ class Tackle:
             sleep(
                 add_jitter(self.cfg.PROFILE.RETRIEVAL_DELAY, self.cfg.BOT.JITTER_SCALE)
             )
+            frame = self.detection.capture_frame()
             if (
-                self.detection.is_fish_hooked()
-                or self.detection.is_retrieval_finished()
+                self.detection.is_fish_hooked(frame=frame)
+                or self.detection.is_retrieval_finished(frame=frame)
             ):
                 return
 
@@ -233,10 +238,11 @@ class Tackle:
             self.stage = StageId.PIRK
             self.timer.set_timeout_start_time()
         while not self.timer.is_pirk_stage_timeout():
-            if self.detection.is_tackle_ready():
+            frame = self.detection.capture_frame()  # 一次截图，多次匹配
+            if self.detection.is_tackle_ready(frame=frame):
                 return
 
-            if self.detection.is_fish_hooked_twice():
+            if self.detection.is_fish_hooked_twice(frame=frame):
                 # If it's enabled, mouse was already pressed by hold_keys() outside
                 if not self.cfg.PROFILE.PIRK_RETRIEVAL:
                     pag.click()
@@ -258,7 +264,7 @@ class Tackle:
             else:
                 sleep(add_jitter(LOOP_DELAY))
             if self.timer.is_rare_event_checkable():
-                self.check_rare_events()
+                self.check_rare_events(frame=frame)
         raise exceptions.PirkTimeoutError
 
     def elevate(self) -> None:
@@ -270,7 +276,8 @@ class Tackle:
             self.stage = StageId.ELEVATE
             self.timer.set_timeout_start_time()
         while not self.timer.is_elevate_stage_timeout():
-            if self.detection.is_fish_hooked_twice():
+            frame = self.detection.capture_frame()
+            if self.detection.is_fish_hooked_twice(frame=frame):
                 # If it's enabled, mouse was already pressed by hold_keys() outside
                 if not self.cfg.PROFILE.PIRK_RETRIEVAL:
                     pag.click()
@@ -291,7 +298,7 @@ class Tackle:
             locked = not locked
 
             if self.timer.is_rare_event_checkable():
-                self.check_rare_events()
+                self.check_rare_events(frame=frame)
                 dropped = not dropped
 
     def lift(self) -> None:
@@ -312,18 +319,20 @@ class Tackle:
         """Pull the fish until it's captured."""
         while not self.timer.is_lift_stage_timeout():
             sleep(add_jitter(LOOP_DELAY))
-            if self.detection.is_fish_captured():
+            frame = self.detection.capture_frame()  # 一次截图，多次匹配
+            if self.detection.is_fish_captured(frame=frame):
                 return
-            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged(frame=frame):
                 raise exceptions.LineSnaggedError
             if self.timer.is_rare_event_checkable():
-                self.check_rare_events()
+                self.check_rare_events(frame=frame)
             if self.timer.is_coffee_drinkable():
                 raise exceptions.CoffeeTimeoutError
 
-        if not self.detection.is_fish_hooked():
+        frame = self.detection.capture_frame()
+        if not self.detection.is_fish_hooked(frame=frame):
             return
-        if self.detection.is_retrieval_finished():
+        if self.detection.is_retrieval_finished(frame=frame):
             press("space")
             sleep(add_jitter(LANDING_NET_DURATION))
             if self.detection.is_fish_captured():
@@ -340,12 +349,13 @@ class Tackle:
 
         while not self.timer.is_lift_stage_timeout():
             sleep(add_jitter(LOOP_DELAY))
-            if self.detection.is_fish_captured():
+            frame = self.detection.capture_frame()  # 一次截图，多次匹配
+            if self.detection.is_fish_captured(frame=frame):
                 return
-            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged(frame=frame):
                 raise exceptions.LineSnaggedError
             if self.timer.is_rare_event_checkable():
-                self.check_rare_events()
+                self.check_rare_events(frame=frame)
             if self.timer.is_coffee_drinkable():
                 raise exceptions.CoffeeTimeoutError
         raise exceptions.LiftTimeoutError

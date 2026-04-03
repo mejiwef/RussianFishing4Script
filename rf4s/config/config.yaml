@@ -148,6 +148,15 @@ PROFILE:
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
     LIFT_TIMEOUT: 16.0
+  TROLLING:
+    DESCRIPTION: "拖钓模式：自动巡航 + 多竿轮询。"
+    LAUNCH_OPTIONS: ""
+    MODE: "trolling"
+    CHECK_DELAY: 16.0
+    PUT_DOWN_DELAY: 2.0
+    POST_ACCELERATION: false
+    LIFT_TIMEOUT: 16.0
+    RANDOM_ROD_SELECTION: false
   PIRK:
     DESCRIPTION: "Default marine fishing, strong pirking at the bottom layer."
     LAUNCH_OPTIONS: ""

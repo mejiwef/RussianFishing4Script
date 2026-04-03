@@ -26,7 +26,7 @@
 | 自动挖饵 | 挂机自动挖饵 | `harvest` |
 | 智能抛力卸力 | 根据鱼竿数据自动调整卸力器 | `frictionbrake` |
 | 渔具计算器 | 计算渔具属性和推荐卸力值 | `calculate` |
-| **拖钓巡航** | OCR 坐标识别 + 向量计算自动纠正航向（多航点循环） | `bot -T` |
+| **拖钓** | 自动巡航 + 多竿轮询，OCR 坐标识别自动纠正航向 | `bot -p TROLLING` |
 
 ## 安装
 
@@ -95,16 +95,16 @@ uv run main.py
 > [!NOTE]
 > 目前只有水底模式支持多竿。
 
-**拖钓巡航**：需要先校准数字模板，然后在 `config.yaml` 中配置航点。
+**拖钓**：将鱼竿插好船上，在 `config.yaml` 中配置航点和巡航参数，然后启动。
 
 ```bash
 # 1. 校准数字模板（首次使用）
 python -m rf4s.controller.calibrate
 
-# 2. 配置 config.yaml 中的 BOT.CRUISE 段
+# 2. 配置 config.yaml 中的 BOT.CRUISE 段（航点、坐标区域等）
 
-# 3. 启动拖钓
-python main.py bot -p SPIN -T forward
+# 3. 启动拖钓模式
+python main.py bot -p TROLLING
 ```
 
 > [!TIP]

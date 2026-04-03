@@ -77,7 +77,7 @@ class Player:
         self.result = result
 
         self.tackle_idx = 0
-        if self.cfg.PROFILE.MODE == "bottom":
+        if self.cfg.PROFILE.MODE in ("bottom", "trolling"):
             self.num_tackle = len(self.cfg.KEY.BOTTOM_RODS)
         else:
             self.num_tackle = 1
@@ -98,7 +98,7 @@ class Player:
         self.shift_pressed = False
         self.using_spod_rod = False
         self.skip_cast = self.cfg.ARGS.SKIP_CAST
-        self.cruise = None  # 巡航控制器，在 enable_trolling() 中延迟初始化
+        self.cruise = None  # 巡航控制器，在 start_trolling_mode() 中初始化
 
     def start_fishing(self) -> None:
         """Start the main fishing loop with the specified fishing strategy."""
@@ -271,6 +271,58 @@ class Player:
                     else:
                         self._put_down_tackle(check_miss_counts)
             # Put it here because we still need to update tackle index before next loop
+            self._update_tackle()
+
+    def start_trolling_mode(self) -> None:
+        """拖钓模式主循环：启动船 + 巡航 + 多竿轮询。
+
+        流程：
+        1. 按 J 启动拖钓（船自动前进）
+        2. 启动巡航控制器（后台线程 OCR 读坐标、纠正航向）
+        3. 主循环轮询各鱼竿：拿起 → 检测有无鱼 → 收线/放回 → 切下一竿
+        """
+        # 启动拖钓（按 J 键）
+        logger.info("启动拖钓")
+        press(TROLLING_KEY)
+        self.trolling_started = True
+
+        # 启动巡航控制器
+        if self.cfg.BOT.CRUISE.ENABLED:
+            from rf4s.controller.cruise import CruiseController
+            self.cruise = CruiseController(
+                self.cfg, self.detection._sct
+            )
+            waypoints = list(self.cfg.BOT.CRUISE.WAYPOINTS)
+            if waypoints:
+                self.cruise.start(waypoints)
+                logger.info("巡航控制器已启动")
+            else:
+                logger.warning("巡航已启用但未配置航点 (BOT.CRUISE.WAYPOINTS)")
+        else:
+            logger.info("巡航未启用，船将直线行驶")
+
+        # 多竿轮询主循环（类似底钓，但不重新抛竿）
+        while True:
+            self.refill_stats()
+            logger.info("检查鱼竿 %s", self.tackle_idx + 1)
+            press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
+            sleep(ANIMATION_DELAY)
+
+            with self.loop_restart_handler():
+                if self.detection.is_fish_hooked():
+                    # 有鱼上钩：收线 → 起鱼
+                    self.retrieve_line()
+                    self.lift_fish()
+                else:
+                    sleep(self.cfg.PROFILE.PUT_DOWN_DELAY)
+                    if self.detection.is_fish_hooked():
+                        self.retrieve_line()
+                        self.lift_fish()
+                    else:
+                        # 没有鱼，放下鱼竿等待
+                        press("0")
+                        sleep(add_jitter(self.cfg.PROFILE.CHECK_DELAY))
+
             self._update_tackle()
 
     def retrieve_and_recast(self) -> None:
@@ -655,17 +707,6 @@ class Player:
         if not self.trolling_started:
             logger.info("Start trolling")
             press(TROLLING_KEY)
-            # 启动自动巡航（如果配置了）
-            if self.cfg.BOT.CRUISE.ENABLED and self.cruise is None:
-                from rf4s.controller.cruise import CruiseController
-                self.cruise = CruiseController(
-                    self.cfg, self.detection._sct
-                )
-                waypoints = list(self.cfg.BOT.CRUISE.WAYPOINTS)
-                if waypoints:
-                    self.cruise.start(waypoints)
-                else:
-                    logger.warning("巡航已启用但未配置航点 (BOT.CRUISE.WAYPOINTS)")
         if self.cfg.ARGS.TROLLING not in ("left", "right"):  # Forward
             return
         key = LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY

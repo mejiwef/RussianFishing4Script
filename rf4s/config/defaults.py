@@ -359,6 +359,29 @@ _C.PROFILE.BOTTOM.LIFT_TIMEOUT = 16.0
 
 
 # ---------------------------------------------------------------------------- #
+#                            Trolling Fishing Profile                          #
+# ---------------------------------------------------------------------------- #
+_C.PROFILE.TROLLING = CN()
+# Profile description
+_C.PROFILE.TROLLING.DESCRIPTION = "拖钓模式：自动巡航 + 多竿轮询。"
+# Profile-level launch options
+_C.PROFILE.TROLLING.LAUNCH_OPTIONS = ""
+# Fishing mode
+_C.PROFILE.TROLLING.MODE = "trolling"
+# 轮询鱼竿的快捷键列表（和底钓共用 BOTTOM_RODS 配置）
+# Time to wait before checking fish bite on the next rod
+_C.PROFILE.TROLLING.CHECK_DELAY = 16.0
+# Time to wait before putting down the rod
+_C.PROFILE.TROLLING.PUT_DOWN_DELAY = 2.0
+# Hold down the Shift key during fish fight
+_C.PROFILE.TROLLING.POST_ACCELERATION = False
+# Timeout for lifting stage
+_C.PROFILE.TROLLING.LIFT_TIMEOUT = 16.0
+# Whether to check the rods randomly or sequentially
+_C.PROFILE.TROLLING.RANDOM_ROD_SELECTION = False
+
+
+# ---------------------------------------------------------------------------- #
 #                      Marine / Wacky Rig Pirking Profile                      #
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.PIRK = CN()
